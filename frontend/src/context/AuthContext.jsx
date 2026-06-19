@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUser = async () => {
         try {
-            const res = await axios.get('http://localhost:3000/api/auth/me');
+            const res = await axios.get('https://website-rag.onrender.com/api/auth/me');
             setUser(res.data);
         } catch (error) {
             console.error('Failed to fetch user', error);
@@ -31,14 +31,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = async (email, password) => {
-        const res = await axios.post('http://localhost:3000/api/auth/login', { email, password });
+        const res = await axios.post('https://website-rag.onrender.com/api/auth/login', { email, password });
         localStorage.setItem('token', res.data.token);
         setToken(res.data.token);
         setUser({ _id: res.data._id, email: res.data.email, tokens: res.data.tokens });
     };
 
     const register = async (email, password) => {
-        const res = await axios.post('http://localhost:3000/api/auth/register', { email, password });
+        const res = await axios.post('https://website-rag.onrender.com/api/auth/register', { email, password });
         localStorage.setItem('token', res.data.token);
         setToken(res.data.token);
         setUser({ _id: res.data._id, email: res.data.email, tokens: res.data.tokens });

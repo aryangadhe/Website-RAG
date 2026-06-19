@@ -3,7 +3,7 @@ import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import { AuthContext } from '../context/AuthContext'
 
-const API = 'http://localhost:3000/api'
+const API = 'https://website-rag.onrender.com/api'
 
 export default function Chat() {
   const { updateTokens, user } = useContext(AuthContext)
