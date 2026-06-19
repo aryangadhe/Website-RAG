@@ -13,7 +13,7 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 WORKDIR /usr/src/app
 
 # Install Python dependencies for the crawler
-RUN pip3 install --no-cache-dir crawl4ai playwright --break-system-packages
+RUN pip3 install --no-cache-dir crawl4ai playwright
 RUN playwright install --with-deps chromium
 
 # Install Node dependencies
