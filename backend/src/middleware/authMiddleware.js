@@ -16,12 +16,24 @@ const protect = async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
             // Get user from the token
-            req.user = await User.findById(decoded.id).select('-password');
+            const user = await User.findById(decoded.id).select('-password');
 
-            if (!req.user) {
+            if (!user) {
                 return res.status(401).json({ error: 'Not authorized, user not found' });
             }
 
+            // Daily Token Reset Check (10 tokens per day)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const lastReset = user.lastTokenReset ? new Date(user.lastTokenReset) : null;
+            if (!lastReset || lastReset < today) {
+                user.tokens = 10;
+                user.lastTokenReset = new Date();
+                await user.save();
+            }
+
+            req.user = user;
             next();
         } catch (error) {
             console.error('Token verification failed:', error);

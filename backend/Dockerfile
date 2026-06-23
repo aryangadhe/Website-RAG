@@ -1,4 +1,4 @@
-FROM node:22-bullseye-slim
+FROM node:22-bookworm-slim
 
 # Install Python and pip
 RUN apt-get update && apt-get install -y \
@@ -13,7 +13,7 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 WORKDIR /usr/src/app
 
 # Install Python dependencies for the crawler
-RUN pip3 install --no-cache-dir crawl4ai playwright
+RUN pip3 install --break-system-packages --no-cache-dir crawl4ai playwright
 RUN playwright install --with-deps chromium
 
 # Install Node dependencies

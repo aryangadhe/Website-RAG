@@ -15,7 +15,11 @@ const userSchema = new mongoose.Schema({
     },
     tokens: {
         type: Number,
-        default: 20, // Give users 20 tokens to start
+        default: 10, // Give users 10 tokens to start
+    },
+    lastTokenReset: {
+        type: Date,
+        default: Date.now
     }
 }, {
     timestamps: true
