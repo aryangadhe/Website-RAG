@@ -12,11 +12,12 @@ def clean_content(markdown: str) -> str:
     markdown = re.sub(r'[ \t]+', ' ', markdown)
     return markdown.strip()
 
-async def crawl(url, max_pages=30):
+async def crawl(url, max_pages=20):
     results = []
     visited = set()
     base_domain = urlparse(url).netloc
 
+    # Highly optimized low-RAM browser settings
     browser_config = BrowserConfig(
         headless=True,
         verbose=False,
@@ -25,16 +26,18 @@ async def crawl(url, max_pages=30):
         memory_saving_mode=True,
         avoid_ads=True,
         avoid_css=True,
-        max_pages_before_recycle=3,
+        max_pages_before_recycle=1, # Recycle Chromium after every page to purge RAM leakage
         extra_args=[
             "--disable-dev-shm-usage",
             "--no-sandbox",
             "--disable-gpu",
             "--disable-setuid-sandbox",
             "--disable-software-rasterizer",
-            "--single-process"
+            "--single-process",
+            "--js-flags=--max-old-space-size=128" # Limits Chromium V8 engine heap memory to 128MB
         ]
     )
+    
     run_config = CrawlerRunConfig(
         cache_mode=CacheMode.BYPASS, 
         exclude_all_images=True,
@@ -47,7 +50,8 @@ async def crawl(url, max_pages=30):
 
         while urls_to_crawl and len(visited) < max_pages:
             batch = []
-            while urls_to_crawl and len(batch) < 3:
+            # Concurrency = 1 (Sequential) to ensure the 512MB RAM ceiling is never breached
+            while urls_to_crawl and len(batch) < 1:
                 next_url = urls_to_crawl.pop(0)
                 if next_url not in visited:
                     batch.append(next_url)
@@ -56,7 +60,7 @@ async def crawl(url, max_pages=30):
             if not batch:
                 break
 
-            # run batch in parallel
+            # Run sequentially
             tasks = [crawler.arun(url=u, config=run_config) for u in batch]
             batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -76,7 +80,7 @@ async def crawl(url, max_pages=30):
                             "content": cleaned
                         })
 
-                    # discover new links
+                    # Discover new links
                     if result.links:
                         excluded_extensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.tar', '.gz', '.mp3', '.mp4', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.xml', '.json']
                         internal_links = []
@@ -85,19 +89,15 @@ async def crawl(url, max_pages=30):
                             if not href or not href.startswith("http"):
                                 continue
                             
-                            # strip fragment (e.g., #section) to get base URL
                             base_href = href.split('#')[0]
                             parsed_href = urlparse(base_href)
                             
-                            # check if same domain and not visited
                             if parsed_href.netloc == base_domain and base_href not in visited:
-                                # check for media/doc extensions case-insensitively
                                 path_lower = parsed_href.path.lower()
                                 if not any(path_lower.endswith(ext) or ext in path_lower for ext in excluded_extensions):
                                     if base_href not in internal_links:
                                         internal_links.append(base_href)
                         
-                        # add all discovered links to queue
                         for link in internal_links:
                             if link not in urls_to_crawl:
                                 urls_to_crawl.append(link)
@@ -106,7 +106,7 @@ async def crawl(url, max_pages=30):
 
 if __name__ == "__main__":
     url = sys.argv[1]
-    max_pages = int(sys.argv[2]) if len(sys.argv) > 2 else 50
+    max_pages = int(sys.argv[2]) if len(sys.argv) > 2 else 20
 
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
