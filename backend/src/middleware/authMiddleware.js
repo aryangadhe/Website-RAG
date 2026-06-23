@@ -28,7 +28,7 @@ const protect = async (req, res, next) => {
 
             const lastReset = user.lastTokenReset ? new Date(user.lastTokenReset) : null;
             if (!lastReset || lastReset < today) {
-                user.tokens = 10;
+                user.tokens = 20;
                 user.lastTokenReset = new Date();
                 await user.save();
             }
