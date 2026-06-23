@@ -25,7 +25,7 @@ async def crawl(url, max_pages=30):
 
         while urls_to_crawl and len(visited) < max_pages:
             batch = []
-            while urls_to_crawl and len(batch) < 15:
+            while urls_to_crawl and len(batch) < 3:
                 next_url = urls_to_crawl.pop(0)
                 if next_url not in visited:
                     batch.append(next_url)
