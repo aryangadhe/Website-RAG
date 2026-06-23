@@ -17,7 +17,23 @@ async def crawl(url, max_pages=30):
     visited = set()
     base_domain = urlparse(url).netloc
 
-    browser_config = BrowserConfig(headless=True, verbose=False, text_mode=True)
+    browser_config = BrowserConfig(
+        headless=True,
+        verbose=False,
+        text_mode=True,
+        light_mode=True,
+        memory_saving_mode=True,
+        avoid_ads=True,
+        avoid_css=True,
+        extra_args=[
+            "--disable-dev-shm-usage",
+            "--no-sandbox",
+            "--disable-gpu",
+            "--disable-setuid-sandbox",
+            "--disable-software-rasterizer",
+            "--single-process"
+        ]
+    )
     run_config = CrawlerRunConfig(cache_mode=CacheMode.BYPASS, exclude_all_images=True)
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
