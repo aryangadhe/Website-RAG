@@ -25,6 +25,7 @@ async def crawl(url, max_pages=30):
         memory_saving_mode=True,
         avoid_ads=True,
         avoid_css=True,
+        max_pages_before_recycle=3,
         extra_args=[
             "--disable-dev-shm-usage",
             "--no-sandbox",
@@ -34,7 +35,12 @@ async def crawl(url, max_pages=30):
             "--single-process"
         ]
     )
-    run_config = CrawlerRunConfig(cache_mode=CacheMode.BYPASS, exclude_all_images=True)
+    run_config = CrawlerRunConfig(
+        cache_mode=CacheMode.BYPASS, 
+        exclude_all_images=True,
+        remove_consent_popups=True,
+        remove_overlay_elements=True
+    )
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
         urls_to_crawl = [url]

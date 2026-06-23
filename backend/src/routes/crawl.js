@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
 
   try {
     console.log(`Crawling: ${url}`)
-    const { pages, total_pages } = await runCrawler(url, 4)
+    const { pages, total_pages } = await runCrawler(url, 20)
     console.log(`Crawled ${total_pages} pages`)
 
     if (pages.length === 0) {
